@@ -12,7 +12,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # running migrations
 RUN python manage.py migrate
+RUN pip3 install django gunicorn
+RUN python manage.py makemigrations
+RUN python manage.py makemigrations home
+RUN python manage.py migrate
+RUN python manage.py collectstatic --no-input
+RUN python manage.py shell -c "from django.contrib.auth.models import User; User.objects.create_superuser('admin', '', 'diogo2002')"
 
-# gunicorn
-CMD ["gunicorn", "--config", "gunicorn-cfg.py", "core.wsgi"]
+ENV VIRTUAL_HOST="furgo.drjgouveia.dev"
+EXPOSE 1234
+CMD ["gunicorn", "--bind", "0.0.0.0:1234", "core.wsgi"]
 
